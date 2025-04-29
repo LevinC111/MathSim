@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summenzeichen (Σ) Simulation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .controls {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        .input-row > div {
+            flex: 1;
+        }
+        button {
+            background-color: #4c8bf5;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #3a7ce2;
+        }
+        .sigma-display {
+            font-family: "Times New Roman", serif;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 25px 0;
+            position: relative;
+        }
+        .sigma {
+            font-size: 3.5rem;
+            position: relative;
+            margin-right: 5px;
+        }
+        .limits {
+            position: relative;
+            height: 70px;
+        }
+        .lower-limit {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            font-size: 1rem;
+        }
+        .upper-limit {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 1rem;
+        }
+        .expression {
+            margin-left: 5px;
+            font-size: 1.8rem;
+        }
+        .result-area {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f7ff;
+            border-radius: 6px;
+        }
+        .expanded-form {
+            font-family: "Times New Roman", serif;
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.2rem;
+        }
+        .calculation-steps {
+            margin-top: 15px;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }
+        .step {
+            margin-bottom: 8px;
+        }
+        .result {
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e6ffe6;
+            border-radius: 4px;
+        }
+        .use-n-checkbox {
+            margin-left: 10px;
+        }
+        .hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 3px;
+        }
+        sub {
+            font-size: 65%;
+            vertical-align: sub;
+        }
+        .term-variable {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Summenzeichen (Σ) Simulation</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="indexVar">Laufindex (z.B. i, j, k):</label>
+                <input type="text" id="indexVar" value="i" maxlength="3">
+            </div>
+            
+            <div class="input-row">
+                <div class="control-group">
+                    <label for="startValue">Startwert:</label>
+                    <input type="number" id="startValue" value="1" min="0">
+                </div>
+                
+                <div class="control-group">
+                    <label for="endValue">Endwert:</label>
+                    <div style="display: flex; align-items: center;">
+                        <input type="number" id="endValue" value="5" min="1" style="flex: 1;">
+                        <div style="margin-left: 10px; display: flex; align-items: center;">
+                            <input type="checkbox" id="useN" style="width: auto;">
+                            <label for="useN" style="display: inline; margin-left: 5px;">n nutzen</label>
+                        </div>
+                    </div>
+                    <div class="hint">Aktiviere "n nutzen" für einen unbestimmten Endwert</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="variableName">Variable (z.B. x, a, f):</label>
+                <input type="text" id="variableName" value="x" maxlength="3">
+                <div class="hint">Die Variable, auf die der Summenoperator angewendet wird</div>
+            </div>
+            
+            <div class="control-group">
+                <label for="expression">Ausdruck für die Variable mit Index:</label>
+                <input type="text" id="expression" value="i" placeholder="z.B. i, 2*i, i**2">
+                <div class="hint">Beispiele: i (für x_i = i), 2*i (für x_i = 2i), i**2 (für x_i = i²)</div>
+            </div>
+            
+            <button id="calculateBtn">Berechnen</button>
+        </div>
+        
+        <div class="sigma-display">
+            <div class="sigma">Σ</div>
+            <div class="limits">
+                <div id="upperLimitDisplay" class="upper-limit">5</div>
+                <div id="lowerLimitDisplay" class="lower-limit">i=1</div>
+            </div>
+            <div id="expressionDisplay" class="expression">
+                <span id="variableDisplay" class="term-variable">x</span><sub id="indexDisplay">i</sub>
+            </div>
+        </div>
+        
+        <div class="expanded-form" id="expandedForm">
+            x₁ + x₂ + x₃ + x₄ + x₅ = 15
+        </div>
+        
+        <div class="result-area">
+            <h3>Berechnung</h3>
+            <div class="calculation-steps" id="calculationSteps"></div>
+            <div class="result" id="resultDisplay">Summe = 15</div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const indexVarInput = document.getElementById('indexVar');
+        const startValueInput = document.getElementById('startValue');
+        const endValueInput = document.getElementById('endValue');
+        const useNCheckbox = document.getElementById('useN');
+        const variableNameInput = document.getElementById('variableName');
+        const expressionInput = document.getElementById('expression');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const upperLimitDisplay = document.getElementById('upperLimitDisplay');
+        const lowerLimitDisplay = document.getElementById('lowerLimitDisplay');
+        const variableDisplay = document.getElementById('variableDisplay');
+        const indexDisplay = document.getElementById('indexDisplay');
+        const expandedForm = document.getElementById('expandedForm');
+        const calculationSteps = document.getElementById('calculationSteps');
+        const resultDisplay = document.getElementById('resultDisplay');
+
+        // Function to create subscript notation for a variable
+        function createSubscript(variable, index) {
+            // Use Unicode subscript characters for 0-9
+            const subscripts = {
+                '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', 
+                '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'
+            };
+            
+            // Convert the index to a string and replace each digit with its subscript
+            const subscriptStr = String(index).split('').map(digit => 
+                subscripts[digit] || digit
+            ).join('');
+            
+            return variable + subscriptStr;
+        }
+
+        // Function to format expression for display
+        function formatExpression(expr) {
+            return expr
+                .replace(/\*\*/g, '^')  // Replace ** with ^ for exponents
+                .replace(/\*/g, '×')     // Replace * with × for multiplication
+                .replace(/\//g, '÷');    // Replace / with ÷ for division
+        }
+        
+        // Function to format expression in a more LaTeX-like way
+        function formatLatexExpression(expr) {
+            return expr
+                .replace(/\*\*2/g, '²')   // Replace **2 with ²
+                .replace(/\*\*3/g, '³')   // Replace **3 with ³
+                .replace(/\*\*(\d+)/g, '<sup>$1</sup>')  // Replace **n with superscript n
+                .replace(/\*/g, '·')      // Replace * with middle dot for multiplication
+                .replace(/\//g, '/');     // Keep / for division
+        }
+        
+        // Function to evaluate the expression for a given value
+        function evaluateExpression(expr, indexVal, indexVar) {
+            try {
+                // Replace index variable with the actual value
+                const parsedExpr = expr.replace(new RegExp(indexVar, 'g'), indexVal);
+                return eval(parsedExpr);
+            } catch (error) {
+                return 'Fehler';
+            }
+        }
+        
+        // Function to calculate the sum and update display
+        function calculateSum() {
+            const indexVar = indexVarInput.value.trim() || 'i';
+            const startValue = parseInt(startValueInput.value);
+            const useN = useNCheckbox.checked;
+            const endValueText = useN ? 'n' : endValueInput.value;
+            const endValue = useN ? (parseInt(endValueInput.value) || 10) : parseInt(endValueInput.value);
+            const variableName = variableNameInput.value.trim() || 'x';
+            const expression = expressionInput.value.trim() || indexVar;
+            
+            // Update the Sigma notation display
+            lowerLimitDisplay.innerHTML = `${indexVar}=${startValue}`;
+            upperLimitDisplay.innerHTML = endValueText;
+            variableDisplay.textContent = variableName;
+            indexDisplay.textContent = indexVar;
+            
+            // Calculate steps and sum
+            const steps = [];
+            let sum = 0;
+            
+            for (let i = startValue; i <= endValue; i++) {
+                const value = evaluateExpression(expression, i, indexVar);
+                if (value === 'Fehler') {
+                    expandedForm.innerHTML = 'Fehler im Ausdruck';
+                    calculationSteps.innerHTML = '<div class="step">Der Ausdruck konnte nicht ausgewertet werden.</div>';
+                    resultDisplay.innerHTML = 'Summe = Fehler';
+                    return;
+                }
+                sum += value;
+                steps.push({ index: i, value, sum });
+            }
+            
+            // Update expanded form
+            let expandedText = '';
+            
+            if (useN) {
+                // Show symbolic expansion for finite n
+                for (let i = startValue; i < startValue + 4 && i <= endValue; i++) {
+                    expandedText += (i > startValue ? ' + ' : '') + createSubscript(variableName, i);
+                }
+                
+                if (endValue > startValue + 3) {
+                    expandedText += ' + ... ';
+                    
+                    if (endValue > startValue + 4) {
+                        expandedText += `+ ${createSubscript(variableName, `${endValueText}-1`)} + ${createSubscript(variableName, endValueText)}`;
+                    } else {
+                        expandedText += `+ ${createSubscript(variableName, endValueText)}`;
+                    }
+                }
+                
+                expandedText += ` = Summe für ${indexVar} von ${startValue} bis ${endValueText}`;
+                expandedText += `<br><small>(wobei ${createSubscript(variableName, indexVar)} = ${formatLatexExpression(expression)})</small>`;
+            } else {
+                // Show actual expansion for concrete n
+                if (endValue - startValue > 10) {
+                    // Too many terms, show abbreviated version
+                    for (let i = startValue; i < startValue + 3; i++) {
+                        expandedText += (i > startValue ? ' + ' : '') + createSubscript(variableName, i);
+                    }
+                    
+                    expandedText += ' + ... ';
+                    
+                    for (let i = endValue - 1; i <= endValue; i++) {
+                        expandedText += '+ ' + createSubscript(variableName, i);
+                    }
+                } else {
+                    // Show full expansion
+                    for (let i = startValue; i <= endValue; i++) {
+                        expandedText += (i > startValue ? ' + ' : '') + createSubscript(variableName, i);
+                    }
+                }
+                
+                expandedText += ` = ${sum}`;
+                expandedText += `<br><small>(wobei ${createSubscript(variableName, indexVar)} = ${formatLatexExpression(expression)})</small>`;
+            }
+            
+            expandedForm.innerHTML = expandedText;
+            
+            // Update calculation steps
+            calculationSteps.innerHTML = '';
+            
+            if (!useN) {
+                steps.forEach((step, index) => {
+                    const stepElement = document.createElement('div');
+                    stepElement.className = 'step';
+                    
+                    if (index === 0) {
+                        stepElement.textContent = `Schritt ${index + 1}: Für ${indexVar} = ${step.index}, ${createSubscript(variableName, step.index)} = ${formatExpression(expression)} = ${step.value}. Summe bisher: ${step.value}`;
+                    } else {
+                        stepElement.textContent = `Schritt ${index + 1}: Für ${indexVar} = ${step.index}, ${createSubscript(variableName, step.index)} = ${formatExpression(expression)} = ${step.value}. Summe bisher: ${steps[index-1].sum} + ${step.value} = ${step.sum}`;
+                    }
+                    
+                    calculationSteps.appendChild(stepElement);
+                });
+                
+                resultDisplay.innerHTML = `Summe = ${sum}`;
+            } else {
+                // For symbolic n, show first few steps and then general formula
+                for (let i = 0; i < Math.min(3, steps.length); i++) {
+                    const step = steps[i];
+                    const stepElement = document.createElement('div');
+                    stepElement.className = 'step';
+                    
+                    if (i === 0) {
+                        stepElement.textContent = `Schritt ${i + 1}: Für ${indexVar} = ${step.index}, ${createSubscript(variableName, step.index)} = ${formatExpression(expression)} = ${step.value}. Summe bisher: ${step.value}`;
+                    } else {
+                        stepElement.textContent = `Schritt ${i + 1}: Für ${indexVar} = ${step.index}, ${createSubscript(variableName, step.index)} = ${formatExpression(expression)} = ${step.value}. Summe bisher: ${steps[i-1].sum} + ${step.value} = ${step.sum}`;
+                    }
+                    
+                    calculationSteps.appendChild(stepElement);
+                }
+                
+                if (steps.length > 3) {
+                    const ellipsisElement = document.createElement('div');
+                    ellipsisElement.className = 'step';
+                    ellipsisElement.textContent = '...';
+                    calculationSteps.appendChild(ellipsisElement);
+                }
+                
+                // Show different result message for symbolic n
+                resultDisplay.innerHTML = useN ? 
+                    `Summe = Formel mit ${endValueText} als Variable` : 
+                    `Summe = ${sum}`;
+            }
+        }
+        
+        // Event listeners
+        calculateBtn.addEventListener('click', calculateSum);
+        
+        // Handle checkbox toggle for "n"
+        useNCheckbox.addEventListener('change', function() {
+            endValueInput.disabled = this.checked;
+            if (this.checked) {
+                endValueInput.placeholder = "Vorschau (opt.)";
+            } else {
+                endValueInput.placeholder = "";
+            }
+            calculateSum();
+        });
+        
+        // Add event listeners for all input fields
+        indexVarInput.addEventListener('input', calculateSum);
+        startValueInput.addEventListener('input', calculateSum);
+        endValueInput.addEventListener('input', calculateSum);
+        variableNameInput.addEventListener('input', calculateSum);
+        expressionInput.addEventListener('input', calculateSum);
+        
+        // Initial calculation
+        calculateSum();
+    </script>
+</body>
+</html>
