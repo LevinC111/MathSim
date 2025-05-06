@@ -1,428 +1,606 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summenzeichen (Σ) Simulation</title>
+    <title>Standardabweichung einfach erklärt</title>
     <style>
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f7fa;
-        }
-        .container {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
             max-width: 800px;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .controls {
             background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 6px;
+            color: #333;
+        }
+        
+        h1, h2 {
+            color: #663300;
+            text-align: center;
+        }
+        
+        .bakery {
+            background-color: #ffe6cc;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px dashed #cc9966;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
             margin-bottom: 20px;
         }
-        .control-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .input-row {
+        
+        .control {
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            align-items: center;
         }
-        .input-row > div {
-            flex: 1;
-        }
+        
         button {
-            background-color: #4c8bf5;
-            color: white;
+            background-color: #8b4513;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 10px;
             cursor: pointer;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            background-color: #a0522d;
+        }
+        
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        select, input {
+            padding: 8px;
+            border-radius: 8px;
+            border: 2px solid #cc9966;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-size: 16px;
+        }
+        
+        .muffin-tray {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .muffin {
+            width: 60px;
+            height: 60px;
+            background-color: #d4a76a;
+            border-radius: 50% 50% 10px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .muffin:before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 20px;
+            background-color: #8b4513;
+            top: -10px;
+            border-radius: 50%;
+        }
+        
+        .normal-muffin {
+            background-color: #d4a76a;
+        }
+        
+        .highlight-muffin {
+            background-color: #ffaa33;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .stats {
+            background-color: #e6f7ff;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+            border: 2px solid #99ccff;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        .visual-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .ruler {
+            height: 40px;
+            background-color: #f0f0f0;
+            position: relative;
+            margin: 30px 0;
+            border-radius: 5px;
+        }
+        
+        .mean-marker {
+            position: absolute;
+            top: -20px;
+            width: 2px;
+            height: 80px;
+            background-color: #ff0000;
+            z-index: 2;
+        }
+        
+        .mean-label {
+            position: absolute;
+            top: -40px;
+            transform: translateX(-50%);
+            background-color: #ff0000;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
             font-weight: bold;
         }
-        button:hover {
-            background-color: #3a7ce2;
+        
+        .sd-zone {
+            position: absolute;
+            height: 40px;
+            background-color: rgba(255, 170, 51, 0.5);
+            z-index: 1;
         }
-        .sigma-display {
-            font-family: "Times New Roman", serif;
-            font-size: 2rem;
+        
+        .sd-label {
+            position: absolute;
+            bottom: -25px;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: #ff6600;
+        }
+        
+        .step-container {
+            background-color: #f0fff0;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #99cc99;
+        }
+        
+        .step {
             display: flex;
             align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            background-color: #339933;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
             justify-content: center;
-            margin: 25px 0;
-            position: relative;
-        }
-        .sigma {
-            font-size: 3.5rem;
-            position: relative;
-            margin-right: 5px;
-        }
-        .limits {
-            position: relative;
-            height: 70px;
-        }
-        .lower-limit {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            font-size: 1rem;
-        }
-        .upper-limit {
-            position: absolute;
-            top: 0;
-            left: 0;
-            font-size: 1rem;
-        }
-        .expression {
-            margin-left: 5px;
-            font-size: 1.8rem;
-        }
-        .result-area {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f0f7ff;
-            border-radius: 6px;
-        }
-        .expanded-form {
-            font-family: "Times New Roman", serif;
-            text-align: center;
-            margin: 15px 0;
-            font-size: 1.2rem;
-        }
-        .calculation-steps {
-            margin-top: 15px;
-            border-top: 1px solid #ddd;
-            padding-top: 15px;
-        }
-        .step {
-            margin-bottom: 8px;
-        }
-        .result {
+            align-items: center;
             font-weight: bold;
-            font-size: 1.2rem;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .hide {
+            display: none;
+        }
+        
+        .show {
+            display: block;
+        }
+        
+        .info-box {
+            background-color: #e6f7ff;
+            border-left: 5px solid #0099ff;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .weight-distribution {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 150px;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        
+        .weight-bar {
+            background-color: #99cc99;
+            width: 30px;
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            transition: height 0.5s;
+        }
+        
+        .weight-bar.highlight {
+            background-color: #ffaa33;
+        }
+        
+        .weight-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+        }
+        
+        .conclusion {
+            background-color: #f9f0ff;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px dashed #cc99ff;
             text-align: center;
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #e6ffe6;
-            border-radius: 4px;
-        }
-        .use-n-checkbox {
-            margin-left: 10px;
-        }
-        .hint {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 3px;
-        }
-        sub {
-            font-size: 65%;
-            vertical-align: sub;
-        }
-        .term-variable {
-            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Summenzeichen (Σ) Simulation</h1>
+    <h1>🧁 Standardabweichung mit Muffins 🧁</h1>
+    
+    <div class="info-box">
+        <p><strong>Die Standardabweichung</strong> ist wie ein "Durchschnitts-Abstand". Sie sagt uns, wie weit die Muffin-Gewichte <strong>im Durchschnitt</strong> vom Mittelwert entfernt sind.</p>
+    </div>
+    
+    <div class="bakery">
+        <h2>Bäckerei-Simulation</h2>
         
         <div class="controls">
-            <div class="control-group">
-                <label for="indexVar">Laufindex (z.B. i, j, k):</label>
-                <input type="text" id="indexVar" value="i" maxlength="3">
+            <div class="control">
+                <label for="baker-skill">Fähigkeit des Bäckers:</label>
+                <select id="baker-skill">
+                    <option value="high">Profi-Bäcker (sehr gleichmäßig)</option>
+                    <option value="medium" selected>Hobby-Bäcker (etwas ungleichmäßig)</option>
+                    <option value="low">Anfänger (sehr ungleichmäßig)</option>
+                </select>
             </div>
             
-            <div class="input-row">
-                <div class="control-group">
-                    <label for="startValue">Startwert:</label>
-                    <input type="number" id="startValue" value="1" min="0">
-                </div>
-                
-                <div class="control-group">
-                    <label for="endValue">Endwert:</label>
-                    <div style="display: flex; align-items: center;">
-                        <input type="number" id="endValue" value="5" min="1" style="flex: 1;">
-                        <div style="margin-left: 10px; display: flex; align-items: center;">
-                            <input type="checkbox" id="useN" style="width: auto;">
-                            <label for="useN" style="display: inline; margin-left: 5px;">n nutzen</label>
-                        </div>
-                    </div>
-                    <div class="hint">Aktiviere "n nutzen" für einen unbestimmten Endwert</div>
-                </div>
+            <div class="control">
+                <label for="muffin-count">Anzahl der Muffins:</label>
+                <select id="muffin-count">
+                    <option value="5">5 Muffins</option>
+                    <option value="10" selected>10 Muffins</option>
+                    <option value="15">15 Muffins</option>
+                </select>
             </div>
             
-            <div class="control-group">
-                <label for="variableName">Variable (z.B. x, a, f):</label>
-                <input type="text" id="variableName" value="x" maxlength="3">
-                <div class="hint">Die Variable, auf die der Summenoperator angewendet wird</div>
-            </div>
-            
-            <div class="control-group">
-                <label for="expression">Ausdruck für die Variable mit Index:</label>
-                <input type="text" id="expression" value="i" placeholder="z.B. i, 2*i, i**2">
-                <div class="hint">Beispiele: i (für x_i = i), 2*i (für x_i = 2i), i**2 (für x_i = i²)</div>
-            </div>
-            
-            <button id="calculateBtn">Berechnen</button>
+            <button id="bake-button">🧁 Neue Muffins backen! 🧁</button>
         </div>
         
-        <div class="sigma-display">
-            <div class="sigma">Σ</div>
-            <div class="limits">
-                <div id="upperLimitDisplay" class="upper-limit">5</div>
-                <div id="lowerLimitDisplay" class="lower-limit">i=1</div>
-            </div>
-            <div id="expressionDisplay" class="expression">
-                <span id="variableDisplay" class="term-variable">x</span><sub id="indexDisplay">i</sub>
-            </div>
+        <div class="muffin-tray" id="muffin-tray">
+            <!-- Muffins werden hier eingefügt -->
         </div>
         
-        <div class="expanded-form" id="expandedForm">
-            x₁ + x₂ + x₃ + x₄ + x₅ = 15
+        <div class="stats">
+            <h3>Was wir beobachten:</h3>
+            <p>Durchschnittliches Gewicht: <span id="mean-weight" class="stat-value">0</span> g</p>
+            <p>Standardabweichung: <span id="std-dev" class="stat-value">0</span> g</p>
+            <p><span id="in-range-percent" class="stat-value">0</span>% der Muffins sind innerhalb einer Standardabweichung vom Durchschnitt entfernt.</p>
         </div>
         
-        <div class="result-area">
-            <h3>Berechnung</h3>
-            <div class="calculation-steps" id="calculationSteps"></div>
-            <div class="result" id="resultDisplay">Summe = 15</div>
+        <div class="visual-container">
+            <h3>Visuelle Darstellung:</h3>
+            
+            <div class="ruler" id="ruler">
+                <!-- Marker werden hier eingefügt -->
+            </div>
+            
+            <div class="weight-distribution" id="weight-distribution">
+                <!-- Balken werden hier eingefügt -->
+            </div>
         </div>
     </div>
-
+    
+    <div class="step-container">
+        <h2>Was bedeutet das?</h2>
+        
+        <div class="step">
+            <div class="step-number">1</div>
+            <div>
+                <p>Der <strong>Mittelwert</strong> (Durchschnitt) ist das "typische" Gewicht unserer Muffincharge.</p>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">2</div>
+            <div>
+                <p>Die <strong>Standardabweichung</strong> zeigt, wie <em>gleichmäßig</em> unsere Muffins sind.</p>
+                <p><strong>Kleine Standardabweichung</strong> = Die Gewichte der Muffins sind sehr ähnlich.</p>
+                <p><strong>Große Standardabweichung</strong> = Die Gewichte der Muffins sind sehr unterschiedlich.</p>
+            </div>
+        </div>
+        
+        <div class="step">
+            <div class="step-number">3</div>
+            <div>
+                <p>In der Regel liegen etwa <strong>68%</strong> aller Muffins innerhalb <strong>einer Standardabweichung</strong> vom Mittelwert entfernt.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="conclusion">
+        <h2>Was haben wir gelernt?</h2>
+        <p>Die Standardabweichung ist ein Maß für die <strong>Streuung</strong> oder <strong>Variation</strong> der Daten.</p>
+        <p>Sie hilft uns zu verstehen, wie konsistent ein Prozess ist - zum Beispiel wie gleichmäßig ein Bäcker Muffins backen kann!</p>
+        <p>Ein Profi-Bäcker hat eine <strong>kleine Standardabweichung</strong> (gleichmäßige Muffins).</p>
+        <p>Ein Anfänger hat eine <strong>große Standardabweichung</strong> (ungleichmäßige Muffins).</p>
+    </div>
+    
     <script>
-        // DOM Elements
-        const indexVarInput = document.getElementById('indexVar');
-        const startValueInput = document.getElementById('startValue');
-        const endValueInput = document.getElementById('endValue');
-        const useNCheckbox = document.getElementById('useN');
-        const variableNameInput = document.getElementById('variableName');
-        const expressionInput = document.getElementById('expression');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const upperLimitDisplay = document.getElementById('upperLimitDisplay');
-        const lowerLimitDisplay = document.getElementById('lowerLimitDisplay');
-        const variableDisplay = document.getElementById('variableDisplay');
-        const indexDisplay = document.getElementById('indexDisplay');
-        const expandedForm = document.getElementById('expandedForm');
-        const calculationSteps = document.getElementById('calculationSteps');
-        const resultDisplay = document.getElementById('resultDisplay');
-
-        // Function to create subscript notation for a variable
-        function createSubscript(variable, index) {
-            // Use Unicode subscript characters for 0-9
-            const subscripts = {
-                '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', 
-                '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉'
-            };
-            
-            // Convert the index to a string and replace each digit with its subscript
-            const subscriptStr = String(index).split('').map(digit => 
-                subscripts[digit] || digit
-            ).join('');
-            
-            return variable + subscriptStr;
-        }
-
-        // Function to format expression for display
-        function formatExpression(expr) {
-            return expr
-                .replace(/\*\*/g, '^')  // Replace ** with ^ for exponents
-                .replace(/\*/g, '×')     // Replace * with × for multiplication
-                .replace(/\//g, '÷');    // Replace / with ÷ for division
-        }
+        // Variablen initialisieren
+        let muffins = [];
+        let mean = 0;
+        let stdDev = 0;
         
-        // Function to format expression in a more LaTeX-like way
-        function formatLatexExpression(expr) {
-            return expr
-                .replace(/\*\*2/g, '²')   // Replace **2 with ²
-                .replace(/\*\*3/g, '³')   // Replace **3 with ³
-                .replace(/\*\*(\d+)/g, '<sup>$1</sup>')  // Replace **n with superscript n
-                .replace(/\*/g, '·')      // Replace * with middle dot for multiplication
-                .replace(/\//g, '/');     // Keep / for division
-        }
+        // DOM-Elemente
+        const bakerSkillSelect = document.getElementById('baker-skill');
+        const muffinCountSelect = document.getElementById('muffin-count');
+        const bakeButton = document.getElementById('bake-button');
+        const muffinTray = document.getElementById('muffin-tray');
+        const meanWeightElement = document.getElementById('mean-weight');
+        const stdDevElement = document.getElementById('std-dev');
+        const inRangePercentElement = document.getElementById('in-range-percent');
+        const ruler = document.getElementById('ruler');
+        const weightDistribution = document.getElementById('weight-distribution');
         
-        // Function to evaluate the expression for a given value
-        function evaluateExpression(expr, indexVal, indexVar) {
-            try {
-                // Replace index variable with the actual value
-                const parsedExpr = expr.replace(new RegExp(indexVar, 'g'), indexVal);
-                return eval(parsedExpr);
-            } catch (error) {
-                return 'Fehler';
-            }
-        }
+        // Event-Listener
+        bakeButton.addEventListener('click', bakeMuffins);
         
-        // Function to calculate the sum and update display
-        function calculateSum() {
-            const indexVar = indexVarInput.value.trim() || 'i';
-            const startValue = parseInt(startValueInput.value);
-            const useN = useNCheckbox.checked;
-            const endValueText = useN ? 'n' : endValueInput.value;
-            const endValue = useN ? (parseInt(endValueInput.value) || 10) : parseInt(endValueInput.value);
-            const variableName = variableNameInput.value.trim() || 'x';
-            const expression = expressionInput.value.trim() || indexVar;
+        // Funktion zum Backen von Muffins
+        function bakeMuffins() {
+            const count = parseInt(muffinCountSelect.value);
+            const skill = bakerSkillSelect.value;
             
-            // Update the Sigma notation display
-            lowerLimitDisplay.innerHTML = `${indexVar}=${startValue}`;
-            upperLimitDisplay.innerHTML = endValueText;
-            variableDisplay.textContent = variableName;
-            indexDisplay.textContent = indexVar;
+            // Standardabweichung basierend auf Fähigkeit festlegen
+            let stdDevPercent;
+            let baseWeight = 50; // Basis-Muffingewicht in Gramm
             
-            // Calculate steps and sum
-            const steps = [];
-            let sum = 0;
-            
-            for (let i = startValue; i <= endValue; i++) {
-                const value = evaluateExpression(expression, i, indexVar);
-                if (value === 'Fehler') {
-                    expandedForm.innerHTML = 'Fehler im Ausdruck';
-                    calculationSteps.innerHTML = '<div class="step">Der Ausdruck konnte nicht ausgewertet werden.</div>';
-                    resultDisplay.innerHTML = 'Summe = Fehler';
-                    return;
-                }
-                sum += value;
-                steps.push({ index: i, value, sum });
+            switch(skill) {
+                case 'high':
+                    stdDevPercent = 0.05; // 5% Variation
+                    break;
+                case 'medium':
+                    stdDevPercent = 0.15; // 15% Variation
+                    break;
+                case 'low':
+                    stdDevPercent = 0.30; // 30% Variation
+                    break;
+                default:
+                    stdDevPercent = 0.15;
             }
             
-            // Update expanded form
-            let expandedText = '';
+            // Muffins mit normalverteilten Gewichten generieren
+            muffins = [];
+            let sumWeights = 0;
             
-            if (useN) {
-                // Show symbolic expansion for finite n
-                for (let i = startValue; i < startValue + 4 && i <= endValue; i++) {
-                    expandedText += (i > startValue ? ' + ' : '') + createSubscript(variableName, i);
-                }
+            for (let i = 0; i < count; i++) {
+                // Box-Muller-Transformation für Normalverteilung
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
                 
-                if (endValue > startValue + 3) {
-                    expandedText += ' + ... ';
-                    
-                    if (endValue > startValue + 4) {
-                        expandedText += `+ ${createSubscript(variableName, `${endValueText}-1`)} + ${createSubscript(variableName, endValueText)}`;
-                    } else {
-                        expandedText += `+ ${createSubscript(variableName, endValueText)}`;
-                    }
-                }
+                // Gewicht berechnen mit Standardabweichung
+                let weight = baseWeight + z * (baseWeight * stdDevPercent);
+                weight = Math.max(weight, 20); // Mindestgewicht 20g
+                weight = Math.round(weight); // Auf ganze Gramm runden
                 
-                expandedText += ` = Summe für ${indexVar} von ${startValue} bis ${endValueText}`;
-                expandedText += `<br><small>(wobei ${createSubscript(variableName, indexVar)} = ${formatLatexExpression(expression)})</small>`;
-            } else {
-                // Show actual expansion for concrete n
-                if (endValue - startValue > 10) {
-                    // Too many terms, show abbreviated version
-                    for (let i = startValue; i < startValue + 3; i++) {
-                        expandedText += (i > startValue ? ' + ' : '') + createSubscript(variableName, i);
-                    }
-                    
-                    expandedText += ' + ... ';
-                    
-                    for (let i = endValue - 1; i <= endValue; i++) {
-                        expandedText += '+ ' + createSubscript(variableName, i);
-                    }
+                muffins.push(weight);
+                sumWeights += weight;
+            }
+            
+            // Mittelwert berechnen
+            mean = sumWeights / count;
+            
+            // Standardabweichung berechnen
+            let sumSquaredDiffs = 0;
+            for (let i = 0; i < muffins.length; i++) {
+                sumSquaredDiffs += Math.pow(muffins[i] - mean, 2);
+            }
+            stdDev = Math.sqrt(sumSquaredDiffs / count);
+            
+            // Prozentsatz innerhalb 1 Standardabweichung berechnen
+            let countInRange = 0;
+            for (let i = 0; i < muffins.length; i++) {
+                if (Math.abs(muffins[i] - mean) <= stdDev) {
+                    countInRange++;
+                }
+            }
+            const percentInRange = (countInRange / count) * 100;
+            
+            // UI aktualisieren
+            updateMuffinDisplay();
+            updateStats(mean, stdDev, percentInRange);
+            updateVisualizations();
+            
+            // Animation für Bake-Button
+            bakeButton.textContent = "🧁 Gebacken! 🧁";
+            setTimeout(() => {
+                bakeButton.textContent = "🧁 Neue Muffins backen! 🧁";
+            }, 1000);
+        }
+        
+        // Muffins anzeigen
+        function updateMuffinDisplay() {
+            muffinTray.innerHTML = '';
+            
+            // Muffins nach Gewicht sortieren für bessere Visualisierung
+            let sortedMuffins = [...muffins].sort((a, b) => a - b);
+            
+            for (let i = 0; i < sortedMuffins.length; i++) {
+                const weight = sortedMuffins[i];
+                const muffinElement = document.createElement('div');
+                
+                // Größe basierend auf Gewicht skalieren (minimal 50px, maximal 80px)
+                const size = 50 + ((weight - 20) / 80) * 30;
+                
+                muffinElement.className = 'muffin';
+                muffinElement.style.width = size + 'px';
+                muffinElement.style.height = size + 'px';
+                
+                // Innerhalb einer Standardabweichung hervorheben
+                if (Math.abs(weight - mean) <= stdDev) {
+                    muffinElement.classList.add('highlight-muffin');
                 } else {
-                    // Show full expansion
-                    for (let i = startValue; i <= endValue; i++) {
-                        expandedText += (i > startValue ? ' + ' : '') + createSubscript(variableName, i);
-                    }
+                    muffinElement.classList.add('normal-muffin');
                 }
                 
-                expandedText += ` = ${sum}`;
-                expandedText += `<br><small>(wobei ${createSubscript(variableName, indexVar)} = ${formatLatexExpression(expression)})</small>`;
-            }
-            
-            expandedForm.innerHTML = expandedText;
-            
-            // Update calculation steps
-            calculationSteps.innerHTML = '';
-            
-            if (!useN) {
-                steps.forEach((step, index) => {
-                    const stepElement = document.createElement('div');
-                    stepElement.className = 'step';
-                    
-                    if (index === 0) {
-                        stepElement.textContent = `Schritt ${index + 1}: Für ${indexVar} = ${step.index}, ${createSubscript(variableName, step.index)} = ${formatExpression(expression)} = ${step.value}. Summe bisher: ${step.value}`;
-                    } else {
-                        stepElement.textContent = `Schritt ${index + 1}: Für ${indexVar} = ${step.index}, ${createSubscript(variableName, step.index)} = ${formatExpression(expression)} = ${step.value}. Summe bisher: ${steps[index-1].sum} + ${step.value} = ${step.sum}`;
-                    }
-                    
-                    calculationSteps.appendChild(stepElement);
-                });
-                
-                resultDisplay.innerHTML = `Summe = ${sum}`;
-            } else {
-                // For symbolic n, show first few steps and then general formula
-                for (let i = 0; i < Math.min(3, steps.length); i++) {
-                    const step = steps[i];
-                    const stepElement = document.createElement('div');
-                    stepElement.className = 'step';
-                    
-                    if (i === 0) {
-                        stepElement.textContent = `Schritt ${i + 1}: Für ${indexVar} = ${step.index}, ${createSubscript(variableName, step.index)} = ${formatExpression(expression)} = ${step.value}. Summe bisher: ${step.value}`;
-                    } else {
-                        stepElement.textContent = `Schritt ${i + 1}: Für ${indexVar} = ${step.index}, ${createSubscript(variableName, step.index)} = ${formatExpression(expression)} = ${step.value}. Summe bisher: ${steps[i-1].sum} + ${step.value} = ${step.sum}`;
-                    }
-                    
-                    calculationSteps.appendChild(stepElement);
-                }
-                
-                if (steps.length > 3) {
-                    const ellipsisElement = document.createElement('div');
-                    ellipsisElement.className = 'step';
-                    ellipsisElement.textContent = '...';
-                    calculationSteps.appendChild(ellipsisElement);
-                }
-                
-                // Show different result message for symbolic n
-                resultDisplay.innerHTML = useN ? 
-                    `Summe = Formel mit ${endValueText} als Variable` : 
-                    `Summe = ${sum}`;
+                muffinElement.innerHTML = weight + 'g';
+                muffinTray.appendChild(muffinElement);
             }
         }
         
-        // Event listeners
-        calculateBtn.addEventListener('click', calculateSum);
+        // Statistiken aktualisieren
+        function updateStats(mean, stdDev, percentInRange) {
+            meanWeightElement.textContent = mean.toFixed(1);
+            stdDevElement.textContent = stdDev.toFixed(1);
+            inRangePercentElement.textContent = percentInRange.toFixed(0);
+        }
         
-        // Handle checkbox toggle for "n"
-        useNCheckbox.addEventListener('change', function() {
-            endValueInput.disabled = this.checked;
-            if (this.checked) {
-                endValueInput.placeholder = "Vorschau (opt.)";
-            } else {
-                endValueInput.placeholder = "";
+        // Visualisierungen aktualisieren
+        function updateVisualizations() {
+            // Ruler aktualisieren
+            ruler.innerHTML = '';
+            
+            // Min und Max für die Skalierung finden
+            const minWeight = Math.min(...muffins);
+            const maxWeight = Math.max(...muffins);
+            const range = maxWeight - minWeight;
+            
+            // Mittelwert-Marker hinzufügen
+            const meanMarker = document.createElement('div');
+            meanMarker.className = 'mean-marker';
+            // Position prozentual berechnen
+            const meanPosition = ((mean - minWeight) / range) * 100;
+            meanMarker.style.left = meanPosition + '%';
+            
+            const meanLabel = document.createElement('div');
+            meanLabel.className = 'mean-label';
+            meanLabel.textContent = 'Mittelwert';
+            meanLabel.style.left = meanPosition + '%';
+            
+            ruler.appendChild(meanMarker);
+            ruler.appendChild(meanLabel);
+            
+            // Standardabweichungszone hinzufügen
+            const sdZone = document.createElement('div');
+            sdZone.className = 'sd-zone';
+            
+            const sdStart = ((mean - stdDev - minWeight) / range) * 100;
+            const sdWidth = (2 * stdDev / range) * 100;
+            
+            sdZone.style.left = sdStart + '%';
+            sdZone.style.width = sdWidth + '%';
+            
+            const sdLeftLabel = document.createElement('div');
+            sdLeftLabel.className = 'sd-label';
+            sdLeftLabel.textContent = '-1 SD';
+            sdLeftLabel.style.left = sdStart + '%';
+            
+            const sdRightLabel = document.createElement('div');
+            sdRightLabel.className = 'sd-label';
+            sdRightLabel.textContent = '+1 SD';
+            sdRightLabel.style.left = (sdStart + sdWidth) + '%';
+            
+            ruler.appendChild(sdZone);
+            ruler.appendChild(sdLeftLabel);
+            ruler.appendChild(sdRightLabel);
+            
+            // Gewichtsverteilung aktualisieren
+            updateWeightDistribution(minWeight, maxWeight);
+        }
+        
+        // Gewichtsverteilung aktualisieren (Histogramm)
+        function updateWeightDistribution(minWeight, maxWeight) {
+            weightDistribution.innerHTML = '';
+            
+            // Erstelle 7 Gruppen (Bins) für die Verteilung
+            const binCount = 7;
+            const binSize = Math.ceil((maxWeight - minWeight) / binCount);
+            const bins = Array(binCount).fill(0);
+            
+            // Zähle Muffins in jeder Gruppe
+            for (let i = 0; i < muffins.length; i++) {
+                const binIndex = Math.min(Math.floor((muffins[i] - minWeight) / binSize), binCount - 1);
+                bins[binIndex]++;
             }
-            calculateSum();
-        });
+            
+            // Finde das Maximum für die Skalierung
+            const maxBinCount = Math.max(...bins);
+            
+            // Erstelle Balken für jede Gruppe
+            for (let i = 0; i < binCount; i++) {
+                const barHeight = (bins[i] / maxBinCount) * 100; // Prozent der maximalen Höhe
+                
+                const bar = document.createElement('div');
+                bar.className = 'weight-bar';
+                bar.style.height = barHeight + '%';
+                
+                // Prüfe, ob diese Gruppe den Mittelwert enthält
+                const binStart = minWeight + i * binSize;
+                const binEnd = binStart + binSize;
+                
+                if (mean >= binStart && mean < binEnd) {
+                    bar.classList.add('highlight');
+                }
+                
+                // Beschriftung hinzufügen
+                const label = document.createElement('div');
+                label.className = 'weight-label';
+                label.textContent = (binStart) + 'g';
+                
+                bar.appendChild(label);
+                weightDistribution.appendChild(bar);
+            }
+            
+            // Letzte Beschriftung hinzufügen
+            const lastBar = document.createElement('div');
+            lastBar.className = 'weight-bar';
+            lastBar.style.height = '0';
+            lastBar.style.width = '0';
+            
+            const lastLabel = document.createElement('div');
+            lastLabel.className = 'weight-label';
+            lastLabel.textContent = (minWeight + binCount * binSize) + 'g';
+            lastLabel.style.left = '0';
+            
+            lastBar.appendChild(lastLabel);
+            weightDistribution.appendChild(lastBar);
+        }
         
-        // Add event listeners for all input fields
-        indexVarInput.addEventListener('input', calculateSum);
-        startValueInput.addEventListener('input', calculateSum);
-        endValueInput.addEventListener('input', calculateSum);
-        variableNameInput.addEventListener('input', calculateSum);
-        expressionInput.addEventListener('input', calculateSum);
-        
-        // Initial calculation
-        calculateSum();
+        // Initial beim Laden backen
+        bakeMuffins();
     </script>
 </body>
 </html>
