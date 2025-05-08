@@ -1,607 +1,207 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Standardabweichung einfach erklärt</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N(0,1) Distribution Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        
-        h1, h2 {
-            color: #663300;
-            text-align: center;
-        }
-        
-        .bakery {
-            background-color: #ffe6cc;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            border: 2px dashed #cc9966;
-        }
-        
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        
-        .control {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        button {
-            background-color: #8b4513;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            font-size: 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            margin-top: 10px;
-            transition: transform 0.2s;
-        }
-        
-        button:hover {
-            transform: scale(1.05);
-            background-color: #a0522d;
-        }
-        
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        select, input {
-            padding: 8px;
-            border-radius: 8px;
-            border: 2px solid #cc9966;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            font-size: 16px;
-        }
-        
-        .muffin-tray {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        
-        .muffin {
-            width: 60px;
-            height: 60px;
-            background-color: #d4a76a;
-            border-radius: 50% 50% 10px 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .muffin:before {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 20px;
-            background-color: #8b4513;
-            top: -10px;
-            border-radius: 50%;
-        }
-        
-        .normal-muffin {
-            background-color: #d4a76a;
-        }
-        
-        .highlight-muffin {
-            background-color: #ffaa33;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .stats {
-            background-color: #e6f7ff;
-            padding: 15px;
-            border-radius: 15px;
-            margin: 20px 0;
-            text-align: center;
-            border: 2px solid #99ccff;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #0066cc;
-        }
-        
-        .visual-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .ruler {
-            height: 40px;
-            background-color: #f0f0f0;
-            position: relative;
-            margin: 30px 0;
-            border-radius: 5px;
-        }
-        
-        .mean-marker {
-            position: absolute;
-            top: -20px;
-            width: 2px;
-            height: 80px;
-            background-color: #ff0000;
-            z-index: 2;
-        }
-        
-        .mean-label {
-            position: absolute;
-            top: -40px;
-            transform: translateX(-50%);
-            background-color: #ff0000;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        
-        .sd-zone {
-            position: absolute;
-            height: 40px;
-            background-color: rgba(255, 170, 51, 0.5);
-            z-index: 1;
-        }
-        
-        .sd-label {
-            position: absolute;
-            bottom: -25px;
-            transform: translateX(-50%);
-            font-weight: bold;
-            color: #ff6600;
-        }
-        
-        .step-container {
-            background-color: #f0fff0;
-            padding: 15px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border: 2px solid #99cc99;
-        }
-        
-        .step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .step-number {
-            background-color: #339933;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #0056b3; }
+        .controls { margin-bottom: 20px; text-align: center; }
+        label { margin-right: 10px; }
+        select, button {
+            padding: 8px 12px;
             margin-right: 10px;
-            flex-shrink: 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
         }
-        
-        .hide {
-            display: none;
-        }
-        
-        .show {
-            display: block;
-        }
-        
-        .info-box {
-            background-color: #e6f7ff;
-            border-left: 5px solid #0099ff;
-            padding: 10px 15px;
-            margin: 15px 0;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .weight-distribution {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            height: 150px;
-            gap: 5px;
-            margin-top: 20px;
-        }
-        
-        .weight-bar {
-            background-color: #99cc99;
-            width: 30px;
-            border-radius: 5px 5px 0 0;
-            position: relative;
-            transition: height 0.5s;
-        }
-        
-        .weight-bar.highlight {
-            background-color: #ffaa33;
-        }
-        
-        .weight-label {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-        }
-        
-        .conclusion {
-            background-color: #f9f0ff;
-            padding: 15px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border: 2px dashed #cc99ff;
-            text-align: center;
-        }
+        button { background-color: #007bff; color: white; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #chartContainer { width: 90%; max-width: 800px; margin: auto; }
+        .description { margin-top: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; }
+        .navigation-link { text-align: center; margin-bottom: 20px; font-size: 1.1em; } /* Stil für den neuen Link */
     </style>
 </head>
 <body>
-    <h1>🧁 Standardabweichung mit Muffins 🧁</h1>
-    
-    <div class="info-box">
-        <p><strong>Die Standardabweichung</strong> ist wie ein "Durchschnitts-Abstand". Sie sagt uns, wie weit die Muffin-Gewichte <strong>im Durchschnitt</strong> vom Mittelwert entfernt sind.</p>
-    </div>
-    
-    <div class="bakery">
-        <h2>Bäckerei-Simulation</h2>
-        
+    <div class="container">
+        <h1>Standard Normal Distribution N(0,1) Simulation</h1>
+
+        <div class="description">
+            <p>This simulation shows how the histogram of samples drawn from a standard normal distribution (mean 0, standard deviation 1) approaches the theoretical probability density function (PDF) as the number of measurements increases.</p>
+            <p>Select the number of measurements and click "Display". The blue bars represent the histogram of the generated data (normalized to represent density), and the red line is the theoretical N(0,1) PDF.</p>
+        </div>
+
+        <div class="navigation-link">
+            <p>Erfahren Sie mehr über den <a href="ZentralerGrenzwertSatz.html">Zentralen Grenzwertsatz</a>.</p>
+        </div>
         <div class="controls">
-            <div class="control">
-                <label for="baker-skill">Fähigkeit des Bäckers:</label>
-                <select id="baker-skill">
-                    <option value="high">Profi-Bäcker (sehr gleichmäßig)</option>
-                    <option value="medium" selected>Hobby-Bäcker (etwas ungleichmäßig)</option>
-                    <option value="low">Anfänger (sehr ungleichmäßig)</option>
-                </select>
-            </div>
-            
-            <div class="control">
-                <label for="muffin-count">Anzahl der Muffins:</label>
-                <select id="muffin-count">
-                    <option value="5">5 Muffins</option>
-                    <option value="10" selected>10 Muffins</option>
-                    <option value="15">15 Muffins</option>
-                </select>
-            </div>
-            
-            <button id="bake-button">🧁 Neue Muffins backen! 🧁</button>
+            <label for="numMeasurements">Number of Measurements:</label>
+            <select id="numMeasurements">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="1000">1000</option>
+                <option value="10000">10000</option>
+            </select>
+            <button id="displayButton">Display</button>
         </div>
-        
-        <div class="muffin-tray" id="muffin-tray">
-            <!-- Muffins werden hier eingefügt -->
-        </div>
-        
-        <div class="stats">
-            <h3>Was wir beobachten:</h3>
-            <p>Durchschnittliches Gewicht: <span id="mean-weight" class="stat-value">0</span> g</p>
-            <p>Standardabweichung: <span id="std-dev" class="stat-value">0</span> g</p>
-            <p><span id="in-range-percent" class="stat-value">0</span>% der Muffins sind innerhalb einer Standardabweichung vom Durchschnitt entfernt.</p>
-        </div>
-        
-        <div class="visual-container">
-            <h3>Visuelle Darstellung:</h3>
-            
-            <div class="ruler" id="ruler">
-                <!-- Marker werden hier eingefügt -->
-            </div>
-            
-            <div class="weight-distribution" id="weight-distribution">
-                <!-- Balken werden hier eingefügt -->
-            </div>
+
+        <div id="chartContainer">
+            <canvas id="myChart"></canvas>
         </div>
     </div>
-    
-    <div class="step-container">
-        <h2>Was bedeutet das?</h2>
-        
-        <div class="step">
-            <div class="step-number">1</div>
-            <div>
-                <p>Der <strong>Mittelwert</strong> (Durchschnitt) ist das "typische" Gewicht unserer Muffincharge.</p>
-            </div>
-        </div>
-        
-        <div class="step">
-            <div class="step-number">2</div>
-            <div>
-                <p>Die <strong>Standardabweichung</strong> zeigt, wie <em>gleichmäßig</em> unsere Muffins sind.</p>
-                <p><strong>Kleine Standardabweichung</strong> = Die Gewichte der Muffins sind sehr ähnlich.</p>
-                <p><strong>Große Standardabweichung</strong> = Die Gewichte der Muffins sind sehr unterschiedlich.</p>
-            </div>
-        </div>
-        
-        <div class="step">
-            <div class="step-number">3</div>
-            <div>
-                <p>In der Regel liegen etwa <strong>68%</strong> aller Muffins innerhalb <strong>einer Standardabweichung</strong> vom Mittelwert entfernt.</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="conclusion">
-        <h2>Was haben wir gelernt?</h2>
-        <p>Die Standardabweichung ist ein Maß für die <strong>Streuung</strong> oder <strong>Variation</strong> der Daten.</p>
-        <p>Sie hilft uns zu verstehen, wie konsistent ein Prozess ist - zum Beispiel wie gleichmäßig ein Bäcker Muffins backen kann!</p>
-        <p>Ein Profi-Bäcker hat eine <strong>kleine Standardabweichung</strong> (gleichmäßige Muffins).</p>
-        <p>Ein Anfänger hat eine <strong>große Standardabweichung</strong> (ungleichmäßige Muffins).</p>
-    </div>
-    
+
     <script>
-        // Variablen initialisieren
-        let muffins = [];
-        let mean = 0;
-        let stdDev = 0;
-        
-        // DOM-Elemente
-        const bakerSkillSelect = document.getElementById('baker-skill');
-        const muffinCountSelect = document.getElementById('muffin-count');
-        const bakeButton = document.getElementById('bake-button');
-        const muffinTray = document.getElementById('muffin-tray');
-        const meanWeightElement = document.getElementById('mean-weight');
-        const stdDevElement = document.getElementById('std-dev');
-        const inRangePercentElement = document.getElementById('in-range-percent');
-        const ruler = document.getElementById('ruler');
-        const weightDistribution = document.getElementById('weight-distribution');
-        
-        // Event-Listener
-        bakeButton.addEventListener('click', bakeMuffins);
-        
-        // Funktion zum Backen von Muffins
-        function bakeMuffins() {
-            const count = parseInt(muffinCountSelect.value);
-            const skill = bakerSkillSelect.value;
-            
-            // Standardabweichung basierend auf Fähigkeit festlegen
-            let stdDevPercent;
-            let baseWeight = 50; // Basis-Muffingewicht in Gramm
-            
-            switch(skill) {
-                case 'high':
-                    stdDevPercent = 0.05; // 5% Variation
-                    break;
-                case 'medium':
-                    stdDevPercent = 0.15; // 15% Variation
-                    break;
-                case 'low':
-                    stdDevPercent = 0.30; // 30% Variation
-                    break;
-                default:
-                    stdDevPercent = 0.15;
+        let myChart = null;
+        let z1_next = null; // For Box-Muller transform
+
+        // Box-Muller transform to generate N(0,1) random numbers
+        function boxMullerTransform() {
+            if (z1_next !== null) {
+                const result = z1_next;
+                z1_next = null;
+                return result;
             }
-            
-            // Muffins mit normalverteilten Gewichten generieren
-            muffins = [];
-            let sumWeights = 0;
-            
+            let u1 = 0, u2 = 0;
+            while (u1 === 0) u1 = Math.random(); // u1 must not be 0 for log
+            u2 = Math.random();
+
+            const R = Math.sqrt(-2.0 * Math.log(u1));
+            const theta = 2.0 * Math.PI * u2;
+
+            const z0 = R * Math.cos(theta);
+            z1_next = R * Math.sin(theta); // Store the second deviate
+            return z0;
+        }
+
+        function generateStandardNormalValues(count) {
+            const values = [];
             for (let i = 0; i < count; i++) {
-                // Box-Muller-Transformation für Normalverteilung
-                let u = 0, v = 0;
-                while (u === 0) u = Math.random();
-                while (v === 0) v = Math.random();
-                let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-                
-                // Gewicht berechnen mit Standardabweichung
-                let weight = baseWeight + z * (baseWeight * stdDevPercent);
-                weight = Math.max(weight, 20); // Mindestgewicht 20g
-                weight = Math.round(weight); // Auf ganze Gramm runden
-                
-                muffins.push(weight);
-                sumWeights += weight;
+                values.push(boxMullerTransform());
             }
-            
-            // Mittelwert berechnen
-            mean = sumWeights / count;
-            
-            // Standardabweichung berechnen
-            let sumSquaredDiffs = 0;
-            for (let i = 0; i < muffins.length; i++) {
-                sumSquaredDiffs += Math.pow(muffins[i] - mean, 2);
+            return values;
+        }
+
+        // Probability Density Function for N(0,1)
+        function normalPdf(x) {
+            return (1 / (Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * x * x);
+        }
+
+        function calculateHistogramData(values, minRange, maxRange, numBins) {
+            const binWidth = (maxRange - minRange) / numBins;
+            const binCounts = new Array(numBins).fill(0);
+            const binLabels = [];
+            const binCenters = [];
+
+            for (let i = 0; i < numBins; i++) {
+                const binStart = minRange + i * binWidth;
+                const binEnd = binStart + binWidth;
+                binLabels.push(`${binStart.toFixed(2)}-${binEnd.toFixed(2)}`);
+                binCenters.push(binStart + binWidth / 2);
             }
-            stdDev = Math.sqrt(sumSquaredDiffs / count);
-            
-            // Prozentsatz innerhalb 1 Standardabweichung berechnen
-            let countInRange = 0;
-            for (let i = 0; i < muffins.length; i++) {
-                if (Math.abs(muffins[i] - mean) <= stdDev) {
-                    countInRange++;
+
+            values.forEach(value => {
+                if (value >= minRange && value < maxRange) {
+                    const binIndex = Math.floor((value - minRange) / binWidth);
+                    binCounts[binIndex]++;
                 }
-            }
-            const percentInRange = (countInRange / count) * 100;
-            
-            // UI aktualisieren
-            updateMuffinDisplay();
-            updateStats(mean, stdDev, percentInRange);
-            updateVisualizations();
-            
-            // Animation für Bake-Button
-            bakeButton.textContent = "🧁 Gebacken! 🧁";
-            setTimeout(() => {
-                bakeButton.textContent = "🧁 Neue Muffins backen! 🧁";
-            }, 1000);
-        }
-        
-        // Muffins anzeigen
-        function updateMuffinDisplay() {
-            muffinTray.innerHTML = '';
-            
-            // Muffins nach Gewicht sortieren für bessere Visualisierung
-            let sortedMuffins = [...muffins].sort((a, b) => a - b);
-            
-            for (let i = 0; i < sortedMuffins.length; i++) {
-                const weight = sortedMuffins[i];
-                const muffinElement = document.createElement('div');
-                
-                // Größe basierend auf Gewicht skalieren (minimal 50px, maximal 80px)
-                const size = 50 + ((weight - 20) / 80) * 30;
-                
-                muffinElement.className = 'muffin';
-                muffinElement.style.width = size + 'px';
-                muffinElement.style.height = size + 'px';
-                
-                // Innerhalb einer Standardabweichung hervorheben
-                if (Math.abs(weight - mean) <= stdDev) {
-                    muffinElement.classList.add('highlight-muffin');
-                } else {
-                    muffinElement.classList.add('normal-muffin');
+                // Count values at the exact maxRange in the last bin
+                else if (value === maxRange) {
+                     binCounts[numBins - 1]++;
                 }
-                
-                muffinElement.innerHTML = weight + 'g';
-                muffinTray.appendChild(muffinElement);
+            });
+
+            const totalValues = values.length;
+            // Normalize to density: count / (total_samples * bin_width)
+            const densities = binCounts.map(count => (totalValues > 0 && binWidth > 0) ? count / (totalValues * binWidth) : 0);
+            
+            return { labels: binCenters.map(c => c.toFixed(2)), densities, binWidth };
+        }
+
+        document.getElementById('displayButton').addEventListener('click', () => {
+            const numMeasurements = parseInt(document.getElementById('numMeasurements').value);
+            const data = generateStandardNormalValues(numMeasurements);
+
+            const minRange = -4;
+            const maxRange = 4;
+            const numBins = 20; // Fixed number of bins
+
+            const { labels: histogramLabels, densities: histogramDensities, binWidth } = calculateHistogramData(data, minRange, maxRange, numBins);
+            
+            const pdfData = histogramLabels.map(label => {
+                const x = parseFloat(label); // Bin center
+                return normalPdf(x);
+            });
+
+            const ctx = document.getElementById('myChart').getContext('2d');
+            if (myChart) {
+                myChart.destroy();
             }
-        }
-        
-        // Statistiken aktualisieren
-        function updateStats(mean, stdDev, percentInRange) {
-            meanWeightElement.textContent = mean.toFixed(1);
-            stdDevElement.textContent = stdDev.toFixed(1);
-            inRangePercentElement.textContent = percentInRange.toFixed(0);
-        }
-        
-        // Visualisierungen aktualisieren
-        function updateVisualizations() {
-            // Ruler aktualisieren
-            ruler.innerHTML = '';
-            
-            // Min und Max für die Skalierung finden
-            const minWeight = Math.min(...muffins);
-            const maxWeight = Math.max(...muffins);
-            const range = maxWeight - minWeight;
-            
-            // Mittelwert-Marker hinzufügen
-            const meanMarker = document.createElement('div');
-            meanMarker.className = 'mean-marker';
-            // Position prozentual berechnen
-            const meanPosition = ((mean - minWeight) / range) * 100;
-            meanMarker.style.left = meanPosition + '%';
-            
-            const meanLabel = document.createElement('div');
-            meanLabel.className = 'mean-label';
-            meanLabel.textContent = 'Mittelwert';
-            meanLabel.style.left = meanPosition + '%';
-            
-            ruler.appendChild(meanMarker);
-            ruler.appendChild(meanLabel);
-            
-            // Standardabweichungszone hinzufügen
-            const sdZone = document.createElement('div');
-            sdZone.className = 'sd-zone';
-            
-            const sdStart = ((mean - stdDev - minWeight) / range) * 100;
-            const sdWidth = (2 * stdDev / range) * 100;
-            
-            sdZone.style.left = sdStart + '%';
-            sdZone.style.width = sdWidth + '%';
-            
-            const sdLeftLabel = document.createElement('div');
-            sdLeftLabel.className = 'sd-label';
-            sdLeftLabel.textContent = '-1 SD';
-            sdLeftLabel.style.left = sdStart + '%';
-            
-            const sdRightLabel = document.createElement('div');
-            sdRightLabel.className = 'sd-label';
-            sdRightLabel.textContent = '+1 SD';
-            sdRightLabel.style.left = (sdStart + sdWidth) + '%';
-            
-            ruler.appendChild(sdZone);
-            ruler.appendChild(sdLeftLabel);
-            ruler.appendChild(sdRightLabel);
-            
-            // Gewichtsverteilung aktualisieren
-            updateWeightDistribution(minWeight, maxWeight);
-        }
-        
-        // Gewichtsverteilung aktualisieren (Histogramm)
-        function updateWeightDistribution(minWeight, maxWeight) {
-            weightDistribution.innerHTML = '';
-            
-            // Erstelle 7 Gruppen (Bins) für die Verteilung
-            const binCount = 7;
-            const binSize = Math.ceil((maxWeight - minWeight) / binCount);
-            const bins = Array(binCount).fill(0);
-            
-            // Zähle Muffins in jeder Gruppe
-            for (let i = 0; i < muffins.length; i++) {
-                const binIndex = Math.min(Math.floor((muffins[i] - minWeight) / binSize), binCount - 1);
-                bins[binIndex]++;
-            }
-            
-            // Finde das Maximum für die Skalierung
-            const maxBinCount = Math.max(...bins);
-            
-            // Erstelle Balken für jede Gruppe
-            for (let i = 0; i < binCount; i++) {
-                const barHeight = (bins[i] / maxBinCount) * 100; // Prozent der maximalen Höhe
-                
-                const bar = document.createElement('div');
-                bar.className = 'weight-bar';
-                bar.style.height = barHeight + '%';
-                
-                // Prüfe, ob diese Gruppe den Mittelwert enthält
-                const binStart = minWeight + i * binSize;
-                const binEnd = binStart + binSize;
-                
-                if (mean >= binStart && mean < binEnd) {
-                    bar.classList.add('highlight');
+
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: histogramLabels, // X-axis labels (bin centers)
+                    datasets: [
+                        {
+                            label: `Histogram (N=${numMeasurements}, ${numBins} bins, width=${binWidth.toFixed(2)}) - Density`,
+                            data: histogramDensities,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            barPercentage: 1.0, // Makes bars touch if categoryPercentage is also 1.0
+                            categoryPercentage: 1.0, // Makes bars touch
+                        },
+                        {
+                            label: 'N(0,1) PDF',
+                            data: pdfData,
+                            type: 'line',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            fill: false,
+                            tension: 0.1, // Smooths the line a bit
+                            pointRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Value (Bin Centers)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Density'
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        title: {
+                            display: true,
+                            text: `Simulated N(0,1) Data vs. Theoretical PDF`
+                        }
+                    }
                 }
-                
-                // Beschriftung hinzufügen
-                const label = document.createElement('div');
-                label.className = 'weight-label';
-                label.textContent = (binStart) + 'g';
-                
-                bar.appendChild(label);
-                weightDistribution.appendChild(bar);
-            }
-            
-            // Letzte Beschriftung hinzufügen
-            const lastBar = document.createElement('div');
-            lastBar.className = 'weight-bar';
-            lastBar.style.height = '0';
-            lastBar.style.width = '0';
-            
-            const lastLabel = document.createElement('div');
-            lastLabel.className = 'weight-label';
-            lastLabel.textContent = (minWeight + binCount * binSize) + 'g';
-            lastLabel.style.left = '0';
-            
-            lastBar.appendChild(lastLabel);
-            weightDistribution.appendChild(lastBar);
-        }
-        
-        // Initial beim Laden backen
-        bakeMuffins();
+            });
+        });
+
+        // Initial display with default value
+        document.getElementById('displayButton').click();
     </script>
-    <a href="ZentralerGrenzwertSatz.html">Zur zweiten Seite</a>
 </body>
 </html>
