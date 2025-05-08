@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation des Zentralen Grenzwertsatzes</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; color: #333; line-height: 1.6; }
+        .container { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.1); max-width: 900px; margin: auto; }
+        h1, h2 { text-align: center; color: #0056b3; }
+        .description, .interpretation { margin-bottom: 20px; padding: 15px; background-color: #e9ecef; border-radius: 4px; }
+        .controls { margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: center; padding: 15px; background-color: #f0f0f0; border-radius: 4px;}
+        .control-group { display: flex; flex-direction: column; }
+        label { margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+        select, input[type="number"], button {
+            padding: 10px 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 0.95em;
+        }
+        button { background-color: #007bff; color: white; cursor: pointer; border-color: #007bff; }
+        button:hover { background-color: #0056b3; border-color: #0056b3;}
+        .stats-info { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background-color: #fdfdfd; }
+        .stats-info p { margin: 8px 0; }
+        #chartContainer, #parentDistChartContainer { width: 100%; margin: auto; margin-top: 20px; }
+        canvas { max-height: 400px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simulation des Zentralen Grenzwertsatzes (ZGS)</h1>
+
+        <div class="description">
+            <p>Der Zentrale Grenzwertsatz ist ein fundamentales Theorem der Wahrscheinlichkeitstheorie. Er besagt, dass sich die Verteilung der Mittelwerte einer ausreichend großen Anzahl von unabhängigen, identisch verteilten Zufallsvariablen einer Normalverteilung annähert – <strong>unabhängig von der Form der ursprünglichen Verteilung</strong> dieser Variablen (solange deren Mittelwert und Varianz endlich sind).</p>
+            <p>Diese Simulation demonstriert den ZGS. Wählen Sie eine ursprüngliche Verteilung, die Stichprobengröße (<i>n</i> – die Anzahl der Zufallszahlen, aus denen jeweils ein Mittelwert gebildet wird) und die Anzahl der zu simulierenden Stichprobenmittelwerte. Klicken Sie dann auf "Simulation starten".</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="parentDistribution">Ursprüngliche Verteilung:</label>
+                <select id="parentDistribution">
+                    <option value="uniform">Gleichverteilung (Stetig, U[0,1])</option>
+                    <option value="exponential">Exponentialverteilung (Stetig, λ=1)</option>
+                    <option value="bernoulli_like">Diskrete Verteilung (X=0 mit P=0.8, X=10 mit P=0.2)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="sampleSize">Stichprobengröße (n):</label>
+                <select id="sampleSize">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="numSampleMeans">Anzahl Stichprobenmittelwerte:</label>
+                <input type="number" id="numSampleMeans" value="2000" min="100" max="10000" step="100">
+            </div>
+            <button id="startButton">Simulation starten</button>
+        </div>
+
+        <div class="stats-info">
+            <h3>Statistiken:</h3>
+            <p><strong>Ursprüngliche Verteilung:</strong> Mittelwert ($\mu$): <span id="parentMean"></span>, Varianz ($\sigma^2$): <span id="parentVariance"></span></p>
+            <p><strong>Theoretische Verteilung der Stichprobenmittelwerte (laut ZGS):</strong> Mittelwert: <span id="cltMean"></span>, Standardabweichung (Standardfehler $\frac{\sigma}{\sqrt{n}}$): <span id="cltStdDev"></span></p>
+        </div>
+        
+        <h2>Histogramm der Stichprobenmittelwerte</h2>
+        <div id="chartContainer">
+            <canvas id="cltChart"></canvas>
+        </div>
+
+        <div class="interpretation">
+            <p><strong>Beobachtung:</strong> Vergleichen Sie das obige Histogramm der Stichprobenmittelwerte mit der roten Kurve (theoretische Normalverteilung). Erhöhen Sie die Stichprobengröße <i>n</i>. Sie werden sehen, dass sich das Histogramm der Normalverteilung immer besser annähert, selbst wenn die "Ursprüngliche Verteilung" (siehe unten) stark von einer Normalverteilung abweicht.</p>
+             <p>Für $n=1$ entspricht die Verteilung der "Stichprobenmittelwerte" exakt der ursprünglichen Verteilung.</p>
+        </div>
+        
+        <h2>Visualisierung der ursprünglichen Verteilung</h2>
+        <p style="text-align:center;">(Histogramm von 1000 direkten Ziehungen aus der gewählten ursprünglichen Verteilung)</p>
+        <div id="parentDistChartContainer">
+            <canvas id="parentChart"></canvas>
+        </div>
+
+    </div>
+
+    <script>
+        let cltChartInstance = null;
+        let parentChartInstance = null;
+
+        const distributions = {
+            uniform: {
+                generate: () => Math.random(),
+                mean: 0.5,
+                variance: 1 / 12,
+                displayName: "Gleichverteilung U[0,1]",
+                range: [0, 1] // Typical range for histogram
+            },
+            exponential: {
+                generate: () => -Math.log(1 - Math.random()), // Lambda = 1
+                mean: 1,
+                variance: 1,
+                displayName: "Exponentialverteilung (λ=1)",
+                range: [0, 8] // Typical range for histogram
+            },
+            bernoulli_like: {
+                generate: () => (Math.random() < 0.8 ? 0 : 10),
+                mean: (0 * 0.8) + (10 * 0.2), // 2
+                variance: ((0*0) * 0.8 + (10*10) * 0.2) - Math.pow((0 * 0.8) + (10 * 0.2), 2), // E[X^2] - (E[X])^2 = 20 - 4 = 16
+                displayName: "Diskrete Verteilung (X=0 P=0.8, X=10 P=0.2)",
+                range: [-1, 11], // Range covering 0 and 10
+                isDiscrete: true,
+                discreteValues: [0, 10]
+            }
+        };
+
+        function normalPdf(x, mean, stdDev) {
+            if (stdDev <= 0) return 0; // Avoid division by zero or complex numbers
+            return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
+        }
+        
+        function calculateHistogramData(values, numBins, fixedRange = null, isDiscrete = false, discreteValues = []) {
+            const dataMin = fixedRange ? fixedRange[0] : Math.min(...values);
+            const dataMax = fixedRange ? fixedRange[1] : Math.max(...values);
+            
+            let binWidth;
+            let actualNumBins = numBins;
+            let binLabels = [];
+            let binCounts = [];
+            let binCenters = [];
+
+            if (isDiscrete && discreteValues.length > 0) {
+                actualNumBins = discreteValues.length;
+                binCounts = new Array(actualNumBins).fill(0);
+                binLabels = discreteValues.map(String);
+                binCenters = discreteValues; // Use actual values as centers
+
+                values.forEach(value => {
+                    const index = discreteValues.indexOf(value);
+                    if (index !== -1) {
+                        binCounts[index]++;
+                    }
+                });
+                // For discrete, binWidth is conceptually 1 for density calculation if values are integers,
+                // but it's better to handle density specifically if ranges are not uniform.
+                // For simplicity here, let's make density based on total count.
+                // Or use bar chart for counts and not density for discrete parent.
+                // For this CLT demo, density is important. Let's assume a bin width of 1 for discrete values for density calculation.
+                 binWidth = 1;
+
+
+            } else {
+                const range = dataMax - dataMin;
+                binWidth = range > 0 ? range / numBins : 1; // Avoid binWidth = 0
+                if (binWidth === 0 && dataMax === dataMin) { // All values are the same
+                     binWidth = 1; // Assign a nominal bin width
+                     actualNumBins = 1; // And one bin
+                     binLabels = [dataMin.toFixed(2)];
+                     binCenters = [dataMin];
+                     binCounts = [values.length];
+                } else if (binWidth > 0) {
+                    binCounts = new Array(actualNumBins).fill(0);
+                    for (let i = 0; i < actualNumBins; i++) {
+                        const binStart = dataMin + i * binWidth;
+                        binCenters.push(binStart + binWidth / 2);
+                        binLabels.push(binCenters[i].toFixed(2));
+                    }
+                     // Ensure the last bin includes the max value
+                    const lastBinEnd = dataMin + actualNumBins * binWidth;
+
+                    values.forEach(value => {
+                        let binIndex;
+                        if (value === dataMax && dataMax === lastBinEnd) { // Edge case for max value falling on last bin edge
+                           binIndex = actualNumBins - 1;
+                        } else {
+                           binIndex = Math.floor((value - dataMin) / binWidth);
+                        }
+                        
+                        if (binIndex >= 0 && binIndex < actualNumBins) {
+                            binCounts[binIndex]++;
+                        } else if (value === dataMax && binIndex === actualNumBins) { // If value is exactly max, put in last bin
+                            binCounts[actualNumBins - 1]++;
+                        }
+                    });
+                } else { // dataMax is not greater than dataMin, potentially all values are same.
+                    actualNumBins = 1;
+                    binLabels = [dataMin.toFixed(2)];
+                    binCenters = [dataMin];
+                    binCounts = [values.length];
+                    binWidth = 1; // Default binWidth
+                }
+            }
+            
+            const totalValues = values.length;
+            const densities = binCounts.map(count => (totalValues > 0 && binWidth > 0) ? count / (totalValues * binWidth) : 0);
+            
+            return { labels: binLabels, densities, binCenters, binWidth, rawCounts: binCounts };
+        }
+
+
+        function updateParentChart(distKey) {
+            const dist = distributions[distKey];
+            const numParentSamples = 1000; // Number of samples to show for parent distribution
+            const parentSamples = [];
+            for (let i = 0; i < numParentSamples; i++) {
+                parentSamples.push(dist.generate());
+            }
+
+            let numBinsParent = dist.isDiscrete ? dist.discreteValues.length : 30;
+            const { labels, densities, rawCounts } = calculateHistogramData(parentSamples, numBinsParent, dist.range, dist.isDiscrete, dist.discreteValues);
+            
+            const dataToPlot = dist.isDiscrete ? rawCounts.map(c => c/numParentSamples) : densities; // Show probabilities for discrete, densities for continuous
+            const yAxisLabel = dist.isDiscrete ? 'Wahrscheinlichkeit' : 'Dichte';
+
+
+            const ctx = document.getElementById('parentChart').getContext('2d');
+            if (parentChartInstance) {
+                parentChartInstance.destroy();
+            }
+            parentChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Verteilung von "${dist.displayName}" (N=${numParentSamples})`,
+                        data: dataToPlot,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        barPercentage: dist.isDiscrete ? 0.5 : 1.0,
+                        categoryPercentage: dist.isDiscrete ? 0.7 : 1.0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Wert' } },
+                        y: { title: { display: true, text: yAxisLabel }, beginAtZero: true }
+                    },
+                    plugins: { title: { display: true, text: `Histogramm der ursprünglichen Verteilung: ${dist.displayName}` } }
+                }
+            });
+        }
+        
+        function runSimulation() {
+            const distKey = document.getElementById('parentDistribution').value;
+            const sampleSizeN = parseInt(document.getElementById('sampleSize').value);
+            const numSampleMeans = parseInt(document.getElementById('numSampleMeans').value);
+
+            const dist = distributions[distKey];
+
+            document.getElementById('parentMean').textContent = dist.mean.toFixed(4);
+            document.getElementById('parentVariance').textContent = dist.variance.toFixed(4);
+
+            const cltExpectedMean = dist.mean;
+            const cltExpectedStdDev = Math.sqrt(dist.variance / sampleSizeN);
+
+            document.getElementById('cltMean').textContent = cltExpectedMean.toFixed(4);
+            document.getElementById('cltStdDev').textContent = cltExpectedStdDev.toFixed(4);
+
+            const sampleMeans = [];
+            for (let i = 0; i < numSampleMeans; i++) {
+                let currentSampleSum = 0;
+                for (let j = 0; j < sampleSizeN; j++) {
+                    currentSampleSum += dist.generate();
+                }
+                sampleMeans.push(currentSampleSum / sampleSizeN);
+            }
+            
+            // Determine histogram range for sample means
+            // More robust range: min/max of actual sample means, or theoretical mean +/- k*std_dev
+            let histMin, histMax;
+            if (sampleMeans.length > 0) {
+                 // Use a range based on the CLT parameters, e.g., mean +/- 4 standard deviations
+                histMin = cltExpectedMean - 4 * cltExpectedStdDev;
+                histMax = cltExpectedMean + 4 * cltExpectedStdDev;
+                // Ensure the range covers the actual data if it's wider
+                const actualMin = Math.min(...sampleMeans);
+                const actualMax = Math.max(...sampleMeans);
+                histMin = Math.min(histMin, actualMin);
+                histMax = Math.max(histMax, actualMax);
+                 // If std dev is tiny (or n is huge), ensure a minimum range
+                if (histMax - histMin < 1e-6) {
+                    histMax = histMin + 0.5; // Default small range
+                    histMin = histMin - 0.5;
+                }
+
+            } else { // No sample means, e.g. numSampleMeans = 0
+                histMin = cltExpectedMean - 1;
+                histMax = cltExpectedMean + 1;
+            }
+
+
+            const numBinsClt = Math.max(10, Math.min(50, Math.ceil(Math.sqrt(numSampleMeans)))); // Adaptive number of bins
+            const { labels: cltHistLabels, densities: cltHistDensities, binCenters: cltBinCenters, binWidth: cltBinWidth } = 
+                calculateHistogramData(sampleMeans, numBinsClt, [histMin, histMax]);
+
+            const pdfValues = cltBinCenters.map(x => normalPdf(x, cltExpectedMean, cltExpectedStdDev));
+
+            const ctxClt = document.getElementById('cltChart').getContext('2d');
+            if (cltChartInstance) {
+                cltChartInstance.destroy();
+            }
+            cltChartInstance = new Chart(ctxClt, {
+                type: 'bar',
+                data: {
+                    labels: cltHistLabels, // Bin centers or ranges
+                    datasets: [
+                        {
+                            label: `Histogramm der Stichprobenmittelwerte (N=${numSampleMeans}, n=${sampleSizeN}) - Dichte`,
+                            data: cltHistDensities,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            barPercentage: 1.0,
+                            categoryPercentage: 1.0,
+                        },
+                        {
+                            label: `Theoretische Normalverteilung (ZGS: μ=${cltExpectedMean.toFixed(2)}, σ=${cltExpectedStdDev.toFixed(2)})`,
+                            data: pdfValues,
+                            type: 'line',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0.1,
+                            pointRadius: 0,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        x: { title: { display: true, text: 'Wert des Stichprobenmittelwerts' } },
+                        y: { title: { display: true, text: 'Dichte' }, beginAtZero: true }
+                    },
+                    plugins: {
+                        title: { display: true, text: `Verteilung der Stichprobenmittelwerte (n=${sampleSizeN})` },
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+            
+            // Update parent distribution chart when simulation runs or parent dist changes
+            updateParentChart(distKey);
+        }
+
+        document.getElementById('startButton').addEventListener('click', runSimulation);
+        document.getElementById('parentDistribution').addEventListener('change', () => {
+             // Update parent chart immediately on change, and then run full simulation if desired
+            const distKey = document.getElementById('parentDistribution').value;
+            updateParentChart(distKey); 
+            // Optionally, also trigger full simulation: runSimulation(); 
+            // For now, let's just update parent plot and require "start" for main sim
+            // Update stats for parent distribution:
+            const dist = distributions[distKey];
+            document.getElementById('parentMean').textContent = dist.mean.toFixed(4);
+            document.getElementById('parentVariance').textContent = dist.variance.toFixed(4);
+            // Clear CLT specific stats if only parent changes
+            document.getElementById('cltMean').textContent = "";
+            document.getElementById('cltStdDev').textContent = "";
+
+        });
+
+        // Initial setup
+        (() => {
+            const initialDistKey = document.getElementById('parentDistribution').value;
+            const dist = distributions[initialDistKey];
+            document.getElementById('parentMean').textContent = dist.mean.toFixed(4);
+            document.getElementById('parentVariance').textContent = dist.variance.toFixed(4);
+            updateParentChart(initialDistKey);
+            runSimulation(); // Run simulation with default values on page load
+        })();
+
+    </script>
+</body>
+</html>
